@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: user4a
+    version: 1.0.0
+  banner:
+    location: classpath:/banner-text.txt
+  datasource:
+    url: jdbc:postgresql://${USER_DB_HOST}:${USER_DB_PORT}/${USER_DB_NAME}
+    username: ${USER_DB_USERNAME}
+    password: ${USER_DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
