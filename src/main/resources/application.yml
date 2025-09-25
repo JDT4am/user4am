@@ -5,9 +5,9 @@ spring:
   banner:
     location: classpath:/banner-text.txt
   datasource:
-    url: jdbc:postgresql://${USER_DB_HOST}:${USER_DB_PORT}/${USER_DB_NAME}
-    username: ${USER_DB_USERNAME}
-    password: ${USER_DB_PASSWORD}
+    url: jdbc:postgresql://${THREAD_DB_HOST}:${THREAD_DB_PORT}/${THREAD_DB_NAME}
+    username: ${THREAD_DB_USERNAME}
+    password: ${THREAD_DB_PASSWORD}
   jpa:
     properties:
       hibernate:
