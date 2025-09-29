@@ -34,11 +34,11 @@ public class UserControllerTest {
 
     @Test
     void testListAllUserNoUsers() {
-        Mockito.when(userService.findAll()).thenReturn(createRestApiResponse(HttpStatus.OK, "Get All User Success", List.of()));
+        Mockito.when(userService.findAllUsers()).thenReturn(createRestApiResponse(HttpStatus.OK, "Get All User Success", List.of()));
 
-        RestApiResponse<List<UserResponse>> response = userController.listAllUsers();
+        RestApiResponse<List<UserResponse>> response = userController.getAllUsers().getBody();
 
-        Mockito.verify(userService, Mockito.times(1)).findAll();
+        Mockito.verify(userService, Mockito.times(1)).findAllUsers();
 
         Assertions.assertTrue(response.getRestApiResponseResults().isEmpty());
         Assertions.assertEquals(200, response.getRestApiResponseCode());
@@ -49,15 +49,15 @@ public class UserControllerTest {
     @Test
     void testListAllUserOneUser() {
         List<UserResponse> users = List.of(new UserResponse());
-        Mockito.when(userService.findAll()).thenReturn(
+        Mockito.when(userService.findAllUsers()).thenReturn(
                 createRestApiResponse(
                         HttpStatus.OK,
                         "Get All User Success",
                         users));
 
-        RestApiResponse<List<UserResponse>> response = userController.listAllUsers();
+        RestApiResponse<List<UserResponse>> response = userController.getAllUsers().getBody();
 
-        Mockito.verify(userService, Mockito.times(1)).findAll();
+        Mockito.verify(userService, Mockito.times(1)).findAllUsers();
 
         Assertions.assertEquals(users, response.getRestApiResponseResults());
         Assertions.assertEquals(200, response.getRestApiResponseCode());
@@ -71,15 +71,15 @@ public class UserControllerTest {
                 new UserResponse(),
                 new UserResponse()
                 );
-        Mockito.when(userService.findAll()).thenReturn(
+        Mockito.when(userService.findAllUsers()).thenReturn(
                 createRestApiResponse(
                         HttpStatus.OK,
                         "Get All User Success",
                         users));
 
-        RestApiResponse<List<UserResponse>> response = userController.listAllUsers();
+        RestApiResponse<List<UserResponse>> response = userController.getAllUsers().getBody();
 
-        Mockito.verify(userService, Mockito.times(1)).findAll();
+        Mockito.verify(userService, Mockito.times(1)).findAllUsers();
 
         Assertions.assertEquals(users, response.getRestApiResponseResults());
         Assertions.assertEquals(200, response.getRestApiResponseCode());

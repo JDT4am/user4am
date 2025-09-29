@@ -1,6 +1,7 @@
 package org.jdt16.user4a.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data

@@ -1,14 +1,7 @@
 package org.jdt16.user4a.dto.response;
 
-import lombok.Data;
-
-@Data
-public class UserResponse {
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-
-import java.util.UUID;
 
 @Data
 public class UserResponse {

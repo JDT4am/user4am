@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
         log.info("ini user: {}", optionalUser);
 
         if (optionalUser.isEmpty()) {
-            return createRestApiResponse(HttpStatus.NOT_FOUND, null, "User not found");
+            return createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null);
         }
 
         UserDTO userDTO = optionalUser.get();
@@ -39,20 +39,19 @@ public class UserServiceImpl implements UserService {
 
         UserResponse result = userEntityDTOToUserResponse(updatedEntity);
 
-        return createRestApiResponse(HttpStatus.OK, result, "User status updated successfully");
+        return createRestApiResponse(HttpStatus.OK,"User status updated successfully", result);
     }
 
     @Override
     public RestApiResponse<List<UserResponse>> findAllUsers() {
         return createRestApiResponse(
-                    HttpStatus.OK,
-                     "All users retrieved successfully",
-                      userRepository
-                            .findAll()
-                            .stream()
-                            .map(UserServiceImpl::userDTOToUserResponse)
-                            .toList());
-      }
+                HttpStatus.OK,
+                "All users retrieved successfully",
+                userRepository
+                        .findAll()
+                        .stream()
+                        .map(UserServiceImpl::userEntityDTOToUserResponse)
+                        .toList());
     }
 
     // 🔹 Mapping entity → response
@@ -61,13 +60,13 @@ public class UserServiceImpl implements UserService {
         userResponse.setUserEntityDTOName(userDTO.getUserEntityDTOName());
         userResponse.setUserEntityDTOAge(userDTO.getUserEntityDTOAge() + " tahun");
         userResponse.setUserEntityDTOEmail(userDTO.getUserEntityDTOEmail());
-        userResponse.setUserEntityDTOGender(userDTO.getUserEntityDTOGender() ? "Laki-Laki" : "Perempuan");
-        userResponse.setUserEntityDTOStatus(userDTO.getUserEntityDTOStatus() ? "aktif" : "non-aktif");
+        userResponse.setUserEntityDTOGender(userDTO.getUserEntityDTOGender() == 1 ? "Laki-Laki" : "Perempuan");
+        userResponse.setUserEntityDTOStatus(userDTO.getUserEntityDTOStatus() == 1 ? "aktif" : "non-aktif");
         return userResponse;
     }
 
     // 🔹 Template response wrapper
-    private <T> RestApiResponse<T> createRestApiResponse(HttpStatus httpStatus, T result, String message) {
+    private <T> RestApiResponse<T> createRestApiResponse(HttpStatus httpStatus, String message, T result) {
         return RestApiResponse.<T>builder()
                 .restApiResponseCode(httpStatus.value())
                 .restApiResponseResults(result)
@@ -75,3 +74,4 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 }
+
