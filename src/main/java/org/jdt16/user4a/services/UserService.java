@@ -16,7 +16,7 @@ public class UserService {
 
     @Transactional
     public UserResponse create(UserDTO req) {
-        // validasi bisnis: name unik
+
         if (repo.existsByNameIgnoreCase(req.getName())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "name already exists");
         }
