@@ -4,6 +4,8 @@ import org.jdt16.user4a.dto.response.RestApiResponse;
 import org.jdt16.user4a.dto.response.UserResponse;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface UserService {
-    RestApiResponse<Page<UserResponse>> findAll(Integer page, Integer size, String sortBy, Boolean desc);
+    RestApiResponse<List<UserResponse>> findAll();
 }
