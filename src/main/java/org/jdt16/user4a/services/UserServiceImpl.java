@@ -1,6 +1,7 @@
 package org.jdt16.user4a.services;
 
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jdt16.user4a.dto.entity.UserDTO;
 import org.jdt16.user4a.dto.response.RestApiResponse;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,24 +44,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public RestApiResponse<List<UserResponse>> findAllUsers() {
-        List<UserDTO> users = userRepository.findAll();
-
-        List<UserResponse> responses = users.stream()
-                .map(UserServiceImpl::userEntityDTOToUserResponse)
-                .collect(Collectors.toList());
-
-        return createRestApiResponse(HttpStatus.OK, responses, "All users retrieved successfully");
+        return createRestApiResponse(
+                    HttpStatus.OK,
+                     "All users retrieved successfully",
+                      userRepository
+                            .findAll()
+                            .stream()
+                            .map(UserServiceImpl::userDTOToUserResponse)
+                            .toList());
+      }
     }
 
     // 🔹 Mapping entity → response
     private static UserResponse userEntityDTOToUserResponse(UserDTO userDTO) {
         UserResponse userResponse = new UserResponse();
-        userResponse.setUserEntityDTOId(userDTO.getUserEntityDTOId());
         userResponse.setUserEntityDTOName(userDTO.getUserEntityDTOName());
-        userResponse.setUserEntityDTOAge(userDTO.getUserEntityDTOAge());
+        userResponse.setUserEntityDTOAge(userDTO.getUserEntityDTOAge() + " tahun");
         userResponse.setUserEntityDTOEmail(userDTO.getUserEntityDTOEmail());
-        userResponse.setUserEntityDTOGender(userDTO.getUserEntityDTOGender());
-        userResponse.setUserEntityDTOStatus(userDTO.getUserEntityDTOStatus());
+        userResponse.setUserEntityDTOGender(userDTO.getUserEntityDTOGender() ? "Laki-Laki" : "Perempuan");
+        userResponse.setUserEntityDTOStatus(userDTO.getUserEntityDTOStatus() ? "aktif" : "non-aktif");
         return userResponse;
     }
 

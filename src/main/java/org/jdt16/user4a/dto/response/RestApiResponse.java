@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RestApiResponse<T> {
-
     @JsonProperty("code")
     private Integer restApiResponseCode;
 
@@ -20,8 +19,4 @@ public class RestApiResponse<T> {
 
     @JsonProperty("message")
     private String restApiResponseMessage;
-
-    @JsonProperty("error")
-    private RestApiResponseError restApiResponseError;
-
 }

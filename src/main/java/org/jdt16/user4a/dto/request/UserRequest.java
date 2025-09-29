@@ -6,16 +6,15 @@ import lombok.Data;
 @Data
 public class UserRequest {
 
-    @JsonProperty
+    @NotBlank(message = "userName cannot be blank")
+    @JsonProperty("userName")
     private String userEntityDTOName;
 
-    @JsonProperty
+    @NotBlank(message = "userAge cannot be blank")
+    @JsonProperty("userAge")
     private String userEntityDTOAge;
 
-    @JsonProperty
+    @NotBlank(message = "userEmail cannot be blank")
+    @JsonProperty("userEmail")
     private String userEntityDTOEmail;
-
-    @JsonProperty
-    private String userEntityDTOStatus;
-
 }
