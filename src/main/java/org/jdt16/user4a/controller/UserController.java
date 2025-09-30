@@ -2,6 +2,7 @@ package org.jdt16.user4a.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jdt16.user4a.dto.request.UserRequest;
 import org.jdt16.user4a.dto.response.RestApiResponse;
 import org.jdt16.user4a.dto.response.UserResponse;
 import org.jdt16.user4a.services.UserService;
@@ -18,6 +19,14 @@ import java.util.UUID;
 @RequestMapping(RestApiPathUtility.API_PATH_USER)
 public class UserController {
     private final UserService userService;
+
+    @PostMapping("/create")
+    public ResponseEntity<RestApiResponse<UserResponse>> createUser(
+            @RequestBody UserRequest request
+    ) {
+        RestApiResponse<UserResponse> response = userService.createUser(request);
+        return ResponseEntity.status(response.getRestApiResponseCode()).body(response);
+    }
 
     @GetMapping("/get")
     public ResponseEntity<RestApiResponse<List<UserResponse>>> getAllUsers() {

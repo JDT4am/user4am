@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jdt16.user4a.dto.entity.UserDTO;
+import org.jdt16.user4a.dto.request.UserRequest;
 import org.jdt16.user4a.dto.response.RestApiResponse;
 import org.jdt16.user4a.dto.response.UserResponse;
 import org.jdt16.user4a.repository.UserRepository;
@@ -54,6 +55,29 @@ public class UserServiceImpl implements UserService {
                         .map(UserServiceImpl::userEntityDTOToUserResponse)
                         .toList());
     }
+
+    // Create New user
+    @Override
+    public RestApiResponse<UserResponse> createUser(UserRequest request) {
+        final String trimmedName = request.getUserEntityDTOName().trim();
+
+        if (userRepository.existsByUserEntityDTOName(trimmedName)) {
+            return createRestApiResponse(HttpStatus.CONFLICT, "User name already exists", null);
+        }
+
+        UserDTO entity = new UserDTO();
+        entity.setUserEntityDTOName(trimmedName);
+        entity.setUserEntityDTOAge(request.getUserEntityDTOAge());
+        entity.setUserEntityDTOEmail(request.getUserEntityDTOEmail());
+        entity.setUserEntityDTOGender(request.getUserEntityDTOGender());
+        entity.setUserEntityDTOStatus(0);
+
+        UserDTO saved = userRepository.save(entity);
+        UserResponse resp = userEntityDTOToUserResponse(saved);
+
+        return createRestApiResponse(HttpStatus.CREATED, "User created successfully", resp);
+    }
+
 
     // 🔹 Mapping entity → response
     private static UserResponse userEntityDTOToUserResponse(UserDTO userDTO) {

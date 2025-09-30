@@ -13,9 +13,13 @@ public class UserRequest {
 
     @NotBlank(message = "userAge cannot be blank")
     @JsonProperty("userAge")
-    private String userEntityDTOAge;
+    private Integer userEntityDTOAge;
 
     @NotBlank(message = "userEmail cannot be blank")
     @JsonProperty("userEmail")
     private String userEntityDTOEmail;
+
+    @NotBlank(message = "userGender cannot be null")
+    @JsonProperty("userGender")
+    private Integer userEntityDTOGender;
 }
