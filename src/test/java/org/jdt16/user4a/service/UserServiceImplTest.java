@@ -19,9 +19,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
     @Mock
@@ -32,6 +36,7 @@ class UserServiceImplTest {
 
     private UUID userId;
     private UserDTO userDTO;
+    private UserRequest validRequest;
     private UserRequest sampleUserRequest;
     private UUID sampleUserId;
 
@@ -63,6 +68,62 @@ class UserServiceImplTest {
         sampleUserRequest.setUserEntityDTOAge(21);
         sampleUserRequest.setUserEntityDTOEmail("test@gmail.com");
         sampleUserRequest.setUserEntityDTOGender(1);
+    }
+    @Test
+    void createUser_success_returns201_andMapsResponse() {
+        when(userRepository.existsByUserEntityDTOName("Budi")).thenReturn(false);
+
+        ArgumentCaptor<UserDTO> captor = ArgumentCaptor.forClass(UserDTO.class);
+
+        UserDTO saved = new UserDTO();
+        saved.setUserEntityDTOName("Budi");
+        saved.setUserEntityDTOAge(25);
+        saved.setUserEntityDTOEmail("budi@example.com");
+        saved.setUserEntityDTOGender(1);
+        saved.setUserEntityDTOStatus(0); // default
+        when(userRepository.save(any(UserDTO.class))).thenReturn(saved);
+
+        RestApiResponse<UserResponse> resp = userService.createUser(validRequest);
+
+        verify(userRepository).existsByUserEntityDTOName("Budi");
+        verify(userRepository).save(captor.capture());
+
+        UserDTO toSave = captor.getValue();
+        assertThat(toSave.getUserEntityDTOStatus()).isEqualTo(0);
+        assertThat(toSave.getUserEntityDTOName()).isEqualTo("Budi");
+
+        assertThat(resp.getRestApiResponseCode()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(resp.getRestApiResponseResults()).isNotNull();
+
+        assertThat(resp.getRestApiResponseResults().getUserEntityDTOStatus()).isEqualTo("non-aktif");
+        assertThat(resp.getRestApiResponseResults().getUserEntityDTOGender()).isEqualTo("Laki-Laki");
+    }
+
+    @Test
+    void createUser_duplicateName_returns409_andNotSaved() {
+        when(userRepository.existsByUserEntityDTOName("Budi")).thenReturn(true);
+        RestApiResponse<UserResponse> resp = userService.createUser(validRequest);
+
+        assertThat(resp.getRestApiResponseCode()).isEqualTo(HttpStatus.CONFLICT.value());
+        assertThat(resp.getRestApiResponseResults()).isNull();
+        verify(userRepository, never()).save(any(UserDTO.class));
+    }
+
+    @Test
+    void createUser_trimNameBeforeDuplicateCheck() {
+        UserRequest req = new UserRequest();
+        req.setUserEntityDTOName("  Budi  ");
+        req.setUserEntityDTOAge(20);
+        req.setUserEntityDTOEmail("budi@example.com");
+        req.setUserEntityDTOGender(1);
+
+        when(userRepository.existsByUserEntityDTOName("Budi")).thenReturn(false);
+        when(userRepository.save(any(UserDTO.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        userService.createUser(req);
+
+        verify(userRepository).existsByUserEntityDTOName("Budi");
+        verify(userRepository).save(any(UserDTO.class));
     }
 
     @Test
