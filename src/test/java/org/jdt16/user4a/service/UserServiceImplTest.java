@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
@@ -36,7 +35,6 @@ class UserServiceImplTest {
 
     private UUID userId;
     private UserDTO userDTO;
-    private UserRequest validRequest;
     private UserRequest sampleUserRequest;
     private UUID sampleUserId;
 
@@ -52,7 +50,6 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         userId = UUID.randomUUID();
         userDTO = new UserDTO();
         userDTO.setUserEntityDTOId(userId);
@@ -71,26 +68,26 @@ class UserServiceImplTest {
     }
     @Test
     void createUser_success_returns201_andMapsResponse() {
-        when(userRepository.existsByUserEntityDTOName("Budi")).thenReturn(false);
+        when(userRepository.existsByUserEntityDTOName("I yan")).thenReturn(false);
 
         ArgumentCaptor<UserDTO> captor = ArgumentCaptor.forClass(UserDTO.class);
 
         UserDTO saved = new UserDTO();
-        saved.setUserEntityDTOName("Budi");
-        saved.setUserEntityDTOAge(25);
-        saved.setUserEntityDTOEmail("budi@example.com");
+        saved.setUserEntityDTOName("I yan");
+        saved.setUserEntityDTOAge(21);
+        saved.setUserEntityDTOEmail("test@gmail.com");
         saved.setUserEntityDTOGender(1);
         saved.setUserEntityDTOStatus(0); // default
         when(userRepository.save(any(UserDTO.class))).thenReturn(saved);
 
-        RestApiResponse<UserResponse> resp = userService.createUser(validRequest);
+        RestApiResponse<UserResponse> resp = userService.createUser(sampleUserRequest);
 
-        verify(userRepository).existsByUserEntityDTOName("Budi");
+        verify(userRepository).existsByUserEntityDTOName("I yan");
         verify(userRepository).save(captor.capture());
 
         UserDTO toSave = captor.getValue();
         assertThat(toSave.getUserEntityDTOStatus()).isEqualTo(0);
-        assertThat(toSave.getUserEntityDTOName()).isEqualTo("Budi");
+        assertThat(toSave.getUserEntityDTOName()).isEqualTo("I yan");
 
         assertThat(resp.getRestApiResponseCode()).isEqualTo(HttpStatus.CREATED.value());
         assertThat(resp.getRestApiResponseResults()).isNotNull();
@@ -101,8 +98,8 @@ class UserServiceImplTest {
 
     @Test
     void createUser_duplicateName_returns409_andNotSaved() {
-        when(userRepository.existsByUserEntityDTOName("Budi")).thenReturn(true);
-        RestApiResponse<UserResponse> resp = userService.createUser(validRequest);
+        when(userRepository.existsByUserEntityDTOName("I yan")).thenReturn(true);
+        RestApiResponse<UserResponse> resp = userService.createUser(sampleUserRequest);
 
         assertThat(resp.getRestApiResponseCode()).isEqualTo(HttpStatus.CONFLICT.value());
         assertThat(resp.getRestApiResponseResults()).isNull();
