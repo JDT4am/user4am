@@ -25,15 +25,14 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@Import(RestControllerAdviceHandler.class)
 public class UserControllerTest {
 
     private MockMvc mockMvc;
@@ -137,113 +136,150 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code", is(409)));
     }
 
-//    @Test
-//    void postCreate_validationError_returns400() throws Exception {
-//        when(userService.createUser(any()))
-//                .thenReturn(createRestApiResponse(HttpStatus.BAD_REQUEST, "Validation error", null));
-//
-//        String invalidJson = """
-//                {
-//                  "userName": "Budi",
-//                  "userAge": 25,
-//                  "userEmail": "budi@example.com"
-//                }
-//                """;
-//
-//        mockMvc.perform(post("/user/create")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(invalidJson))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.code", is(400)));
-//    }
-
     @Test
-    void testListAllUserNoUsers() {
-        Mockito.when(userService.findAllUsers()).thenReturn(
-                createRestApiResponse(HttpStatus.OK,
-                        "Get All User Success",
-                        List.of()));
+    void postCreate_invalidGender_returns400() throws Exception {
+        when(userService.createUser(any()))
+                .thenReturn(createRestApiResponse(HttpStatus.BAD_REQUEST, "Gender only 1 or 2", null));
 
-        ResponseEntity<RestApiResponse<List<UserResponse>>> response = userController.getAllUsers();
+        String invalidJson = """
+                {
+                    "name" : "bye",
+                    "age" : 34,
+                    "email" : "bye@gmail.com",
+                    "gender": 3
+                }
+                """;
 
-        Mockito.verify(userService, Mockito.times(1)).findAllUsers();
-
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertTrue(response.getBody().getRestApiResponseResults().isEmpty());
-        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
-        Assertions.assertEquals("Get All User Success", response.getBody().getRestApiResponseMessage());
+        mockMvc.perform(post("/user/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", containsString("Gender only 1 or 2")))
+                .andExpect(jsonPath("$.results").doesNotExist());
     }
 
     @Test
-    void testListAllUserOneUser() {
-        List<UserResponse> users = userResponses.subList(0, 0);
-        Mockito.when(userService.findAllUsers()).thenReturn(
-                createRestApiResponse(
-                        HttpStatus.OK,
-                        "Get All User Success",
-                        users));
+    void putUpdateUser_success_returns200_andBody() throws Exception {
+        UUID id = UUID.randomUUID();
 
-        ResponseEntity<RestApiResponse<List<UserResponse>>> response = userController.getAllUsers();
+        UserResponse body = new UserResponse();
+        body.setUserEntityDTOName("Updated Budi");
+        body.setUserEntityDTOAge("30 tahun");
+        body.setUserEntityDTOEmail("updated@example.com");
+        body.setUserEntityDTOGender("Laki-Laki");
+        body.setUserEntityDTOStatus("aktif");
 
-        Mockito.verify(userService, Mockito.times(1)).findAllUsers();
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertEquals(users, response.getBody().getRestApiResponseResults());
-        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
-        Assertions.assertEquals("Get All User Success", response.getBody().getRestApiResponseMessage());
+        when(userService.updateUser(eq(id), any()))
+                .thenReturn(createRestApiResponse(HttpStatus.OK, "User Updated!", body));
+
+        mockMvc.perform(put("/user/update/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validJson()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code", is(200)))
+                .andExpect(jsonPath("$.results.name", is("Updated Budi")));
     }
 
     @Test
-    void testListAllUserManyUsers() {
-        Mockito.when(userService.findAllUsers()).thenReturn(
-                createRestApiResponse(
-                        HttpStatus.OK,
-                        "Get All User Success",
-                        userResponses));
+    void putUpdateUser_duplicateName_returns409() throws Exception {
+        UUID id = UUID.randomUUID();
 
-        ResponseEntity<RestApiResponse<List<UserResponse>>> response = userController.getAllUsers();
+        when(userService.updateUser(eq(id), any()))
+                .thenReturn(createRestApiResponse(HttpStatus.CONFLICT, "User name already exists", null));
 
-        Mockito.verify(userService, Mockito.times(1)).findAllUsers();
+        mockMvc.perform(put("/user/update/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validJson()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code", is(409)))
+                .andExpect(jsonPath("$.results").doesNotExist());
+    }
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertEquals(userResponses, response.getBody().getRestApiResponseResults());
-        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
-        Assertions.assertEquals("Get All User Success", response.getBody().getRestApiResponseMessage());
+    @Test
+    void putUpdateUser_invalidGender_returns400() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        when(userService.updateUser(eq(id), any()))
+                .thenReturn(createRestApiResponse(HttpStatus.BAD_REQUEST, "Gender only 1 or 2", null));
+
+        mockMvc.perform(put("/user/update/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validJson().replace("1", "0")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", containsString("Gender only 1 or 2")))
+                .andExpect(jsonPath("$.results").doesNotExist());
+    }
+
+    @Test
+    void putUpdateUser_notFound_returns404() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        when(userService.updateUser(eq(id), any()))
+                .thenReturn(createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null));
+
+        mockMvc.perform(put("/user/update/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validJson()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code", is(404)))
+                .andExpect(jsonPath("$.results").doesNotExist());
+    }
+
+
+    @Test
+    void testListAllUserNoUsers() throws Exception {
+        when(userService.findAllUsers())
+                .thenReturn(createRestApiResponse(HttpStatus.OK, "Get All User Success", List.of()));
+
+        mockMvc.perform(get("/user/get"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code", is(200)))
+                .andExpect(jsonPath("$.message", is("Get All User Success")))
+                .andExpect(jsonPath("$.results", hasSize(0)));
+    }
+
+    @Test
+    void testListAllUserManyUsers() throws Exception {
+        when(userService.findAllUsers())
+                .thenReturn(createRestApiResponse(HttpStatus.OK, "Get All User Success", userResponses));
+
+        mockMvc.perform(get("/user/get"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code", is(200)))
+                .andExpect(jsonPath("$.message", is("Get All User Success")))
+                .andExpect(jsonPath("$.results", hasSize(userResponses.size())))
+                .andExpect(jsonPath("$.results[0].name", is(user1.getUserEntityDTOName())));
     }
 
     @Test
     void testUpdateUserStatusPositive() throws Exception {
         UUID userId = UUID.randomUUID();
+        when(userService.updateStatusUser(userId))
+                .thenReturn(createRestApiResponse(HttpStatus.OK, "User status updated successfully", user1));
 
-        Mockito.when(userService.updateStatusUser(userId)).thenReturn(
-                createRestApiResponse(HttpStatus.OK,"User status updated successfully", user1));
-        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserStatus(userId);
-
-        Mockito.verify(userService, Mockito.times(1)).updateStatusUser(userId);
-
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertEquals(user1, response.getBody().getRestApiResponseResults());
-        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
-        Assertions.assertEquals("User status updated successfully", response.getBody().getRestApiResponseMessage());
+        mockMvc.perform(patch("/user/update/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code", is(200)))
+                .andExpect(jsonPath("$.message", is("User status updated successfully")))
+                .andExpect(jsonPath("$.results.name", is(user1.getUserEntityDTOName())));
     }
 
     @Test
     void testUpdateUserStatusNegative() throws Exception {
         UUID userId = UUID.randomUUID();
+        when(userService.updateStatusUser(userId))
+                .thenReturn(createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null));
 
-        Mockito.when(userService.updateStatusUser(userId)).thenReturn(
-                createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null));
-        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserStatus(userId);
-
-        Mockito.verify(userService, Mockito.times(1)).updateStatusUser(userId);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertEquals(null, response.getBody().getRestApiResponseResults());
-        Assertions.assertEquals(404, response.getBody().getRestApiResponseCode());
-        Assertions.assertEquals("User not found", response.getBody().getRestApiResponseMessage());
+        mockMvc.perform(patch("/user/update/{id}", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code", is(404)))
+                .andExpect(jsonPath("$.message", is("User not found")))
+                .andExpect(jsonPath("$.results").doesNotExist());
     }
 }

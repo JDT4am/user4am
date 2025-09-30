@@ -11,21 +11,19 @@ import lombok.Data;
 public class UserRequest {
 
     @NotBlank(message = "userName cannot be blank")
-    @JsonProperty("userName")
+    @JsonProperty("name")
     private String userEntityDTOName;
 
     @NotNull(message = "userAge cannot be blank")
     @Min(0)
-    @JsonProperty("userAge")
+    @JsonProperty("age")
     private Integer userEntityDTOAge;
 
     @NotBlank(message = "userEmail cannot be blank")
-    @JsonProperty("userEmail")
+    @JsonProperty("email")
     private String userEntityDTOEmail;
 
     @NotNull(message = "userGender cannot be null")
-    @Min(0)
-    @Max(1)
-    @JsonProperty("userGender")
+    @JsonProperty("gender")
     private Integer userEntityDTOGender;
 }

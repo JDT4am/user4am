@@ -5,5 +5,5 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TableNameEntityUtility {
-    public static final String TABLE_USERS = "user";
+    public static final String TABLE_USERS = "mst_user";
 }

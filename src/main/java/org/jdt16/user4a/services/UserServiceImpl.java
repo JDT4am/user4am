@@ -65,6 +65,10 @@ public class UserServiceImpl implements UserService {
             return createRestApiResponse(HttpStatus.CONFLICT, "User name already exists", null);
         }
 
+        if (request.getUserEntityDTOGender() < 1 || request.getUserEntityDTOGender() > 2) {
+            return createRestApiResponse(HttpStatus.BAD_REQUEST, "Gender only 1 or 2", null);
+        }
+
         UserDTO entity = new UserDTO();
         entity.setUserEntityDTOName(trimmedName);
         entity.setUserEntityDTOAge(request.getUserEntityDTOAge());
@@ -80,8 +84,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public RestApiResponse<UserResponse> updateUser(UUID userId, UserRequest userRequest) {
-        UserDTO existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        Optional<UserDTO> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty())
+            return createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null);
+        UserDTO existingUser = optionalUser.get();
+
+        if (userRepository.existsByUserEntityDTOName(userRequest.getUserEntityDTOName())) {
+            return createRestApiResponse(HttpStatus.CONFLICT, "User name already exists", null);
+        }
+
+        if (userRequest.getUserEntityDTOGender() < 1 || userRequest.getUserEntityDTOGender() > 2) {
+            return createRestApiResponse(HttpStatus.BAD_REQUEST, "Gender only 1 or 2", null);
+        }
 
         existingUser.setUserEntityDTOName(userRequest.getUserEntityDTOName());
         existingUser.setUserEntityDTOAge(userRequest.getUserEntityDTOAge());

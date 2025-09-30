@@ -124,6 +124,27 @@ class UserServiceImplTest {
     }
 
     @Test
+    void createUser_invalidGender_returns400() {
+        // Arrange
+        UserRequest req = new UserRequest();
+        req.setUserEntityDTOName("Invalid Gender");
+        req.setUserEntityDTOAge(22);
+        req.setUserEntityDTOEmail("invalid@example.com");
+        req.setUserEntityDTOGender(3); // ❌ invalid
+
+        // Act
+        RestApiResponse<UserResponse> resp = userService.createUser(req);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST.value(), resp.getRestApiResponseCode());
+        assertEquals("Gender only 1 or 2", resp.getRestApiResponseMessage());
+        assertNull(resp.getRestApiResponseResults());
+
+        verify(userRepository, never()).save(any(UserDTO.class));
+    }
+
+
+    @Test
     void testUpdateStatusUser_UserExists() {
         // Mock repository behavior
         when(userRepository.findById(userId)).thenReturn(Optional.of(userDTO));
@@ -158,12 +179,75 @@ class UserServiceImplTest {
     void updateUser_userNotFound_shouldThrowException() {
         when(userRepository.findById(sampleUserId)).thenReturn(Optional.empty());
 
-        RuntimeException e = assertThrows(RuntimeException.class, () -> userService.updateUser(sampleUserId, sampleUserRequest));
-        assertTrue(e.getMessage().contains("User not found"), "Pesan exception harus mengandung 'User not found'");
+        RestApiResponse<UserResponse> response = userService.updateUser(sampleUserId, sampleUserRequest);
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getRestApiResponseCode());
+        assertNull(response.getRestApiResponseResults());
+        assertEquals("User not found", response.getRestApiResponseMessage());
 
         verify(userRepository, times(1)).findById(sampleUserId);
         verify(userRepository, never()).save(any(UserDTO.class));
     }
+
+    @Test
+    void updateUser_success_returns200_andUpdatesFields() {
+        when(userRepository.findById(sampleUserId)).thenReturn(Optional.of(userDTO));
+        when(userRepository.save(any(UserDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        RestApiResponse<UserResponse> response = userService.updateUser(sampleUserId, sampleUserRequest);
+
+        verify(userRepository, times(1)).findById(sampleUserId);
+        ArgumentCaptor<UserDTO> captor = ArgumentCaptor.forClass(UserDTO.class);
+        verify(userRepository, times(1)).save(captor.capture());
+
+        UserDTO savedUser = captor.getValue();
+        assertEquals("I yan", savedUser.getUserEntityDTOName());
+        assertEquals(21, savedUser.getUserEntityDTOAge());
+        assertEquals("test@gmail.com", savedUser.getUserEntityDTOEmail());
+        assertEquals(1, savedUser.getUserEntityDTOGender());
+
+        assertEquals(HttpStatus.OK.value(), response.getRestApiResponseCode());
+        assertEquals("User Updated!", response.getRestApiResponseMessage());
+        assertNotNull(response.getRestApiResponseResults());
+        assertEquals("I yan", response.getRestApiResponseResults().getUserEntityDTOName());
+        assertEquals("non-aktif", response.getRestApiResponseResults().getUserEntityDTOStatus());
+    }
+
+    @Test
+    void updateUser_duplicateName_returns409_andNotSaved() {
+        when(userRepository.findById(sampleUserId)).thenReturn(Optional.of(userDTO));
+        when(userRepository.existsByUserEntityDTOName("I yan")).thenReturn(true);
+
+        RestApiResponse<UserResponse> response = userService.updateUser(sampleUserId, sampleUserRequest);
+
+        verify(userRepository, times(1)).findById(sampleUserId);
+        verify(userRepository, times(1)).existsByUserEntityDTOName("I yan");
+        verify(userRepository, never()).save(any(UserDTO.class));
+
+        assertEquals(HttpStatus.CONFLICT.value(), response.getRestApiResponseCode());
+        assertEquals("User name already exists", response.getRestApiResponseMessage());
+        assertNull(response.getRestApiResponseResults());
+    }
+
+    @Test
+    void updateUser_invalidGender_returns400() {
+        when(userRepository.findById(sampleUserId)).thenReturn(Optional.of(userDTO));
+
+        UserRequest req = new UserRequest();
+        req.setUserEntityDTOName("Still Valid Name");
+        req.setUserEntityDTOAge(30);
+        req.setUserEntityDTOEmail("stillvalid@example.com");
+        req.setUserEntityDTOGender(0);
+
+        RestApiResponse<UserResponse> resp = userService.updateUser(sampleUserId, req);
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), resp.getRestApiResponseCode());
+        assertEquals("Gender only 1 or 2", resp.getRestApiResponseMessage());
+        assertNull(resp.getRestApiResponseResults());
+
+        verify(userRepository, never()).save(any(UserDTO.class));
+    }
+
 
     @Test
     void testFindAllUsers() {

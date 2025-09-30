@@ -47,7 +47,7 @@ public class UserController {
     @PutMapping(RestApiPathUtility.API_PATH_UPDATE + RestApiPathUtility.API_PATH_BY_USER_ID)
     public ResponseEntity<RestApiResponse<UserResponse>> updateUser(
             @PathVariable UUID id,
-            @RequestBody UserRequest userRequest) {
+            @Valid @RequestBody UserRequest userRequest) {
         log.info("Update User -- userRequest.id = {}", id);
         RestApiResponse<UserResponse> response = userService.updateUser(id, userRequest);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getRestApiResponseCode()));
