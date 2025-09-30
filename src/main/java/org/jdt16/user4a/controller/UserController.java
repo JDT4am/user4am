@@ -1,22 +1,46 @@
 package org.jdt16.user4a.controller;
 
+
 import lombok.RequiredArgsConstructor;
-import org.jdt16.user4a.dto.entity.UserDTO;
-import org.jdt16.user4a.dto.entity.UserResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.jdt16.user4a.dto.request.UserRequest;
+import org.jdt16.user4a.dto.response.RestApiResponse;
+import org.jdt16.user4a.dto.response.UserResponse;
 import org.jdt16.user4a.services.UserService;
-import org.springframework.http.HttpStatus;
+import org.jdt16.user4a.utility.RestApiPathUtility;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping(RestApiPathUtility.API_PATH_USER)
 public class UserController {
+    private final UserService userService;
 
-    private final UserService service;
 
     @PostMapping("/create")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse create(@RequestBody UserDTO req) {
-        return service.create(req);
+    public ResponseEntity<RestApiResponse<UserResponse>> createUser(
+             @RequestBody UserRequest request
+    ) {
+        RestApiResponse<UserResponse> response = userService.createUser(request);
+        return ResponseEntity.status(response.getRestApiResponseCode()).body(response);
+    }
+
+    @GetMapping("/get")
+    public ResponseEntity<RestApiResponse<List<UserResponse>>> getAllUsers() {
+        RestApiResponse<List<UserResponse>> response = userService.findAllUsers();
+        return ResponseEntity.status(response.getRestApiResponseCode()).body(response);
+    }
+
+    @PutMapping(RestApiPathUtility.API_PATH_MODULE_UPDATE_STATUS)
+    public ResponseEntity<RestApiResponse<UserResponse>> updateUserPassword(
+            @PathVariable("id") UUID userId
+    ) throws Exception {
+        RestApiResponse<UserResponse> response = userService.updateStatusUser(userId);
+        return ResponseEntity.status(response.getRestApiResponseCode()).body(response);
     }
 }

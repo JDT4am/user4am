@@ -1,22 +1,25 @@
 package org.jdt16.user4a.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class UserRequest {
-    @JsonProperty("Name")
-    private String userDTOName;
 
-    @JsonProperty("Email")
-    private String userDTOEmail;
+    @NotBlank(message = "userName cannot be blank")
+    @JsonProperty("userName")
+    private String userEntityDTOName;
 
-    @JsonProperty("Umur")
-    private String userDTOAge;
+    @NotBlank(message = "userAge cannot be blank")
+    @JsonProperty("userAge")
+    private Integer userEntityDTOAge;
 
-    @JsonProperty("Gender")
-    private String userDTOGender;
+    @NotBlank(message = "userEmail cannot be blank")
+    @JsonProperty("userEmail")
+    private String userEntityDTOEmail;
 
-
-
+    @NotBlank(message = "userGender cannot be null")
+    @JsonProperty("userGender")
+    private Integer userEntityDTOGender;
 }
