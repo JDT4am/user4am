@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
@@ -35,9 +36,10 @@ public class UserControllerTest {
                 .build();
     }
 
+    UserResponse user1 = new UserResponse();
+
     @BeforeEach
     void setUp() {
-        UserResponse user1 = new UserResponse();
         user1.setUserEntityDTOName("Nathaniel Audrian");
         user1.setUserEntityDTOAge("23 tahun");
         user1.setUserEntityDTOEmail("nathaniel@example.com");
@@ -113,5 +115,37 @@ public class UserControllerTest {
         Assertions.assertEquals(userResponses, response.getRestApiResponseResults());
         Assertions.assertEquals(200, response.getRestApiResponseCode());
         Assertions.assertEquals("Get All User Success", response.getRestApiResponseMessage());
+    }
+
+    @Test
+    void testUpdateUserStatusPositive() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        Mockito.when(userService.updateStatusUser(userId)).thenReturn(
+                createRestApiResponse(HttpStatus.OK,"User status updated successfully", user1));
+        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserPassword(userId);
+
+        Mockito.verify(userService, Mockito.times(1)).updateStatusUser(userId);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(user1, response.getBody().getRestApiResponseResults());
+        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
+        Assertions.assertEquals("User status updated successfully", response.getBody().getRestApiResponseMessage());
+    }
+
+    @Test
+    void testUpdateUserStatusNegative() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        Mockito.when(userService.updateStatusUser(userId)).thenReturn(
+                createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null));
+        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserPassword(userId);
+
+        Mockito.verify(userService, Mockito.times(1)).updateStatusUser(userId);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Assertions.assertEquals(null, response.getBody().getRestApiResponseResults());
+        Assertions.assertEquals(404, response.getBody().getRestApiResponseCode());
+        Assertions.assertEquals("User not found", response.getBody().getRestApiResponseMessage());
     }
 }
