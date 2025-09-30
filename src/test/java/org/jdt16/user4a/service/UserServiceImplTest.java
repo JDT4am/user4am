@@ -1,6 +1,7 @@
 package org.jdt16.user4a.service;
 
 import org.jdt16.user4a.dto.entity.UserDTO;
+import org.jdt16.user4a.dto.request.UserRequest;
 import org.jdt16.user4a.dto.response.RestApiResponse;
 import org.jdt16.user4a.dto.response.UserResponse;
 import org.jdt16.user4a.repository.UserRepository;
@@ -31,6 +32,8 @@ class UserServiceImplTest {
 
     private UUID userId;
     private UserDTO userDTO;
+    private UserRequest sampleUserRequest;
+    private UUID sampleUserId;
 
     private static UserResponse userEntityDTOToUserResponse(UserDTO userDTO) {
         UserResponse userResponse = new UserResponse();
@@ -53,6 +56,13 @@ class UserServiceImplTest {
         userDTO.setUserEntityDTOEmail("fahri@example.com");
         userDTO.setUserEntityDTOGender(1);
         userDTO.setUserEntityDTOStatus(0);
+
+        sampleUserId = UUID.randomUUID();
+        sampleUserRequest = new UserRequest();
+        sampleUserRequest.setUserEntityDTOName("I yan");
+        sampleUserRequest.setUserEntityDTOAge(21);
+        sampleUserRequest.setUserEntityDTOEmail("test@gmail.com");
+        sampleUserRequest.setUserEntityDTOGender(1);
     }
 
     @Test
@@ -84,6 +94,17 @@ class UserServiceImplTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getRestApiResponseCode());
         assertNull(response.getRestApiResponseResults());
         assertEquals("User not found", response.getRestApiResponseMessage());
+    }
+
+    @Test
+    void updateUser_userNotFound_shouldThrowException() {
+        when(userRepository.findById(sampleUserId)).thenReturn(Optional.empty());
+
+        RuntimeException e = assertThrows(RuntimeException.class, () -> userService.updateUser(sampleUserId, sampleUserRequest));
+        assertTrue(e.getMessage().contains("User not found"), "Pesan exception harus mengandung 'User not found'");
+
+        verify(userRepository, times(1)).findById(sampleUserId);
+        verify(userRepository, never()).save(any(UserDTO.class));
     }
 
     @Test

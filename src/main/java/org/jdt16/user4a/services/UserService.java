@@ -14,4 +14,6 @@ public interface UserService {
     RestApiResponse<List<UserResponse>> findAllUsers();
 
     RestApiResponse<UserResponse> createUser(UserRequest request);
+
+    RestApiResponse<UserResponse> updateUser(UUID userId, UserRequest userRequest);
 }

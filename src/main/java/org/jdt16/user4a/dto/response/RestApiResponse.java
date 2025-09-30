@@ -19,4 +19,7 @@ public class RestApiResponse<T> {
 
     @JsonProperty("message")
     private String restApiResponseMessage;
+
+    @JsonProperty("error")
+    private RestApiResponseError restApiResponseError;
 }

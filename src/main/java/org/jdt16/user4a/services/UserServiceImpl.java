@@ -16,12 +16,12 @@ import java.util.List;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
 @Service("userService")
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
 
     // 🔹 Update status user by ID
@@ -76,6 +76,27 @@ public class UserServiceImpl implements UserService {
         UserResponse resp = userEntityDTOToUserResponse(saved);
 
         return createRestApiResponse(HttpStatus.CREATED, "User created successfully", resp);
+    }
+
+    @Override
+    public RestApiResponse<UserResponse> updateUser(UUID userId, UserRequest userRequest) {
+        UserDTO existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        existingUser.setUserEntityDTOName(userRequest.getUserEntityDTOName());
+        existingUser.setUserEntityDTOAge(userRequest.getUserEntityDTOAge());
+        existingUser.setUserEntityDTOEmail(userRequest.getUserEntityDTOEmail());
+        existingUser.setUserEntityDTOGender(userRequest.getUserEntityDTOGender());
+        existingUser.setUserEntityDTOStatus(0);
+
+        userRepository.save(existingUser);
+
+        UserResponse userResponse = userEntityDTOToUserResponse(existingUser);
+        return RestApiResponse.<UserResponse>builder()
+                .restApiResponseCode(HttpStatus.OK.value())
+                .restApiResponseResults(userResponse)
+                .restApiResponseMessage("User Updated!")
+                .build();
     }
 
 
