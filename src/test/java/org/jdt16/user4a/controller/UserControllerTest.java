@@ -72,7 +72,7 @@ public class UserControllerTest {
 
         Mockito.verify(userService, Mockito.times(1)).findAllUsers();
 
-        Assertions.assertEquals(200, response.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
         Assertions.assertTrue(response.getBody().getRestApiResponseResults().isEmpty());
         Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
