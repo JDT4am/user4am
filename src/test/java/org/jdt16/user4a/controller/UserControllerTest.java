@@ -124,7 +124,7 @@ public class UserControllerTest {
 
         Mockito.when(userService.updateStatusUser(userId)).thenReturn(
                 createRestApiResponse(HttpStatus.OK,"User status updated successfully", user1));
-        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserPassword(userId);
+        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserStatus(userId);
 
         Mockito.verify(userService, Mockito.times(1)).updateStatusUser(userId);
 
@@ -140,7 +140,7 @@ public class UserControllerTest {
 
         Mockito.when(userService.updateStatusUser(userId)).thenReturn(
                 createRestApiResponse(HttpStatus.NOT_FOUND, "User not found", null));
-        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserPassword(userId);
+        ResponseEntity<RestApiResponse<UserResponse>> response = userController.updateUserStatus(userId);
 
         Mockito.verify(userService, Mockito.times(1)).updateStatusUser(userId);
 

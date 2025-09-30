@@ -34,8 +34,8 @@ public class UserController {
         return ResponseEntity.status(response.getRestApiResponseCode()).body(response);
     }
 
-    @PutMapping(RestApiPathUtility.API_PATH_MODULE_UPDATE_STATUS)
-    public ResponseEntity<RestApiResponse<UserResponse>> updateUserPassword(
+    @PatchMapping(RestApiPathUtility.API_PATH_MODULE_UPDATE_STATUS)
+    public ResponseEntity<RestApiResponse<UserResponse>> updateUserStatus(
             @PathVariable("id") UUID userId
     ) throws Exception {
         RestApiResponse<UserResponse> response = userService.updateStatusUser(userId);
