@@ -1,10 +1,11 @@
-package org.jdt16.user4a.services.implementation.module;
+package org.jdt16.user4a.service;
 
 import org.jdt16.user4a.dto.entity.UserDTO;
 import org.jdt16.user4a.dto.request.UserRequest;
 import org.jdt16.user4a.dto.response.RestApiResponse;
 import org.jdt16.user4a.dto.response.UserResponse;
 import org.jdt16.user4a.repository.UserRepository;
+import org.jdt16.user4a.services.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

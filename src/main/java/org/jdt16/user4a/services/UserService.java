@@ -1,4 +1,4 @@
-package org.jdt16.user4a.services.interfacing.module;
+package org.jdt16.user4a.services;
 
 import org.jdt16.user4a.dto.request.UserRequest;
 import org.jdt16.user4a.dto.response.RestApiResponse;

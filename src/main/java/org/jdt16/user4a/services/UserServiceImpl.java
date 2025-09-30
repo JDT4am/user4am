@@ -1,4 +1,4 @@
-package org.jdt16.user4a.services.implementation.module;
+package org.jdt16.user4a.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +7,6 @@ import org.jdt16.user4a.dto.request.UserRequest;
 import org.jdt16.user4a.dto.response.RestApiResponse;
 import org.jdt16.user4a.dto.response.UserResponse;
 import org.jdt16.user4a.repository.UserRepository;
-import org.jdt16.user4a.services.interfacing.module.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
