@@ -32,6 +32,16 @@ class UserServiceImplTest {
     private UUID userId;
     private UserDTO userDTO;
 
+    private static UserResponse userEntityDTOToUserResponse(UserDTO userDTO) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setUserEntityDTOName(userDTO.getUserEntityDTOName());
+        userResponse.setUserEntityDTOAge(userDTO.getUserEntityDTOAge() + " tahun");
+        userResponse.setUserEntityDTOEmail(userDTO.getUserEntityDTOEmail());
+        userResponse.setUserEntityDTOGender(userDTO.getUserEntityDTOGender() == 1 ? "Laki-Laki" : "Perempuan");
+        userResponse.setUserEntityDTOStatus(userDTO.getUserEntityDTOStatus() == 1 ? "aktif" : "non-aktif");
+        return userResponse;
+    }
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -93,5 +103,21 @@ class UserServiceImplTest {
         assertEquals(HttpStatus.OK.value(), response.getRestApiResponseCode());
         assertEquals(2, response.getRestApiResponseResults().size());
         assertEquals("All users retrieved successfully", response.getRestApiResponseMessage());
+
+        assertEquals(
+                List.of(userEntityDTOToUserResponse(userDTO), userEntityDTOToUserResponse(user2)),
+                response.getRestApiResponseResults()
+        );
+    }
+
+    @Test
+    void testFindAllUsersEmpty() {
+        when(userRepository.findAll()).thenReturn(List.of());
+
+        RestApiResponse<List<UserResponse>> response = userService.findAllUsers();
+
+        assertEquals(HttpStatus.OK.value(), response.getRestApiResponseCode());
+        assertEquals("All users retrieved successfully", response.getRestApiResponseMessage());
+        assertTrue(response.getRestApiResponseResults().isEmpty());
     }
 }
