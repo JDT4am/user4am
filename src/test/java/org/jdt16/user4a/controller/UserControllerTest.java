@@ -91,13 +91,13 @@ public class UserControllerTest {
                         "Get All User Success",
                         users));
 
-        RestApiResponse<List<UserResponse>> response = userController.getAllUsers().getBody();
+        ResponseEntity<RestApiResponse<List<UserResponse>>> response = userController.getAllUsers();
 
         Mockito.verify(userService, Mockito.times(1)).findAllUsers();
-
-        Assertions.assertEquals(users, response.getRestApiResponseResults());
-        Assertions.assertEquals(200, response.getRestApiResponseCode());
-        Assertions.assertEquals("Get All User Success", response.getRestApiResponseMessage());
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(users, response.getBody().getRestApiResponseResults());
+        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
+        Assertions.assertEquals("Get All User Success", response.getBody().getRestApiResponseMessage());
     }
 
     @Test
@@ -108,13 +108,14 @@ public class UserControllerTest {
                         "Get All User Success",
                         userResponses));
 
-        RestApiResponse<List<UserResponse>> response = userController.getAllUsers().getBody();
+        ResponseEntity<RestApiResponse<List<UserResponse>>> response = userController.getAllUsers();
 
         Mockito.verify(userService, Mockito.times(1)).findAllUsers();
 
-        Assertions.assertEquals(userResponses, response.getRestApiResponseResults());
-        Assertions.assertEquals(200, response.getRestApiResponseCode());
-        Assertions.assertEquals("Get All User Success", response.getRestApiResponseMessage());
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(userResponses, response.getBody().getRestApiResponseResults());
+        Assertions.assertEquals(200, response.getBody().getRestApiResponseCode());
+        Assertions.assertEquals("Get All User Success", response.getBody().getRestApiResponseMessage());
     }
 
     @Test
